@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String
+  price       Float
+  stock       Int
+  type        ProductType
+  images      String[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  description String
+  details     String[]
+  orderItems  OrderItem[]
+}
+
+enum ProductType {
+  DRINK
+  MERCH
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  caps      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  role Role @default(USER)
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Reservation {
+  id               Int               @id @default(autoincrement())
+  entity           EntityType
+  place            Place
+  responsibleName  String
+  responsibleEmail String
+  visitDate        DateTime
+  peopleCount      Int
+  status           ReservationStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum EntityType {
+  SCHOOL
+  ORGANIZATION
+  COMPANY
+  PERSONAL_FAMILY
+}
+
+enum Place {
+  NUKA_PLANT
+  NUKA_WORLD
+}
+
+enum ReservationStatus {
+  PENDING
+  APPROVED
+  CANCELLED
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  subtotal Float
+  shipping Float
+  taxes    Float
+  total    Float
+
+  paymentMethod   String
+  useCapsDiscount Boolean
+
+  customerName    String
+  customerAddress String
+  customerZipCode String
+  customerPhone   String
+
+  status OrderStatus @default(PENDING)
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+
+  name     String
+  price    Int
+  quantity Int
+
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
